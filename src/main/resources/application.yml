@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: backend
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/origem}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:123456}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:1025}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${SMTP_AUTH:false}
+          starttls:
+            enable: ${SMTP_STARTTLS:false}
+
+server:
+  port: ${SERVER_PORT:8080}
+
+
+app:
+  cors-allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:3000}
+  payments:
+    demo-mode: ${DEMO_MODE:true}
+  founding-fee:
+    # Taxa de fundador — valor default do protótipo (R$ 1.490 / $1.490 USD), ainda não definido pelo cliente.
+    amount-cents-brl: ${FOUNDING_FEE_CENTS_BRL:149000}
+    amount-cents-usd: ${FOUNDING_FEE_CENTS_USD:149000}
+
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY:}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
