@@ -8,4 +8,6 @@ import java.util.UUID;
 
 public interface SignupRepository extends JpaRepository<Signup, UUID> {
     Optional<Signup> findByStripePaymentIntentId(String stripePaymentIntentId);
+
+    Optional<Signup> findByIdAndAccessToken(UUID id, UUID accessToken);
 }

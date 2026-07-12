@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
 
 @Service
 public class EmailService {
@@ -21,10 +22,11 @@ public class EmailService {
 
     public void sendPaymentConfirmation(Signup signup) {
         boolean pt = "pt".equals(signup.getLang());
+        String safeName = HtmlUtils.htmlEscape(signup.getName());
         String subject = pt ? "Pagamento confirmado - Roots" : "Payment confirmed - Roots";
         String body = pt
-                ? "Olá " + signup.getName() + ",<br><br>Seu pagamento da taxa de fundador foi confirmado e seu acesso antecipado à Roots está garantido.<br><br>Equipe Roots"
-                : "Hi " + signup.getName() + ",<br><br>Your founding fee payment has been confirmed and your early access to Roots is secured.<br><br>The Roots team";
+                ? "Olá " + safeName + ",<br><br>Seu pagamento da taxa de fundador foi confirmado e seu acesso antecipado à Roots está garantido.<br><br>Equipe Roots"
+                : "Hi " + safeName + ",<br><br>Your founding fee payment has been confirmed and your early access to Roots is secured.<br><br>The Roots team";
 
         try {
             MimeMessage message = mailSender.createMimeMessage();

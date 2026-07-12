@@ -51,9 +51,16 @@ public class SignupService {
                         : appProperties.foundingFee().amountCentsUsd())
                 .currency(isPt ? "BRL" : "USD")
                 .createdAt(Instant.now())
+                .accessToken(UUID.randomUUID())
                 .build();
 
         return signupRepository.save(signup);
+    }
+
+    @Transactional(readOnly = true)
+    public Signup getById(UUID id, UUID accessToken) {
+        return signupRepository.findByIdAndAccessToken(id, accessToken)
+                .orElseThrow(() -> new SignupNotFoundException(id));
     }
 
     private static boolean isBrazil(String country) {
@@ -77,11 +84,5 @@ public class SignupService {
         }
         int mod = sum % 11;
         return mod < 2 ? 0 : 11 - mod;
-    }
-
-    @Transactional(readOnly = true)
-    public Signup getById(UUID id) {
-        return signupRepository.findById(id)
-                .orElseThrow(() -> new SignupNotFoundException(id));
     }
 }

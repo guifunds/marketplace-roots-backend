@@ -57,12 +57,16 @@ public class Signup {
     @Column(name = "paid_at")
     private Instant paidAt;
 
+    @Column(name = "access_token", nullable = false)
+    private UUID accessToken;
+
     public Signup() {
     }
 
     public Signup(UUID id, ProfileType profileType, String name, String email, String phone, String document,
                   String country, String lang, SignupStatus status, String stripePaymentIntentId,
-                  long foundingFeeAmountCents, String currency, Instant createdAt, Instant paidAt) {
+                  long foundingFeeAmountCents, String currency, Instant createdAt, Instant paidAt,
+                  UUID accessToken) {
         this.id = id;
         this.profileType = profileType;
         this.name = name;
@@ -77,6 +81,7 @@ public class Signup {
         this.currency = currency;
         this.createdAt = createdAt;
         this.paidAt = paidAt;
+        this.accessToken = accessToken;
     }
 
     public static Builder builder() {
@@ -195,6 +200,14 @@ public class Signup {
         this.paidAt = paidAt;
     }
 
+    public UUID getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(UUID accessToken) {
+        this.accessToken = accessToken;
+    }
+
     public static final class Builder {
         private UUID id;
         private ProfileType profileType;
@@ -210,6 +223,7 @@ public class Signup {
         private String currency;
         private Instant createdAt;
         private Instant paidAt;
+        private UUID accessToken;
 
         private Builder() {
         }
@@ -284,9 +298,14 @@ public class Signup {
             return this;
         }
 
+        public Builder accessToken(UUID accessToken) {
+            this.accessToken = accessToken;
+            return this;
+        }
+
         public Signup build() {
             return new Signup(id, profileType, name, email, phone, document, country, lang, status,
-                    stripePaymentIntentId, foundingFeeAmountCents, currency, createdAt, paidAt);
+                    stripePaymentIntentId, foundingFeeAmountCents, currency, createdAt, paidAt, accessToken);
         }
     }
 }

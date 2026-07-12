@@ -8,6 +8,7 @@ import com.stripe.exception.StripeException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -28,6 +29,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleInvalidField(InvalidFieldException ex) {
         List<ApiError.FieldError> fieldErrors = List.of(new ApiError.FieldError(ex.getField(), ex.getMessage()));
         return ResponseEntity.badRequest().body(ApiError.of("Campos inválidos", fieldErrors));
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<ApiError> handleMissingHeader(MissingRequestHeaderException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError.of("Cadastro não encontrado"));
     }
 
     @ExceptionHandler(SignupNotFoundException.class)

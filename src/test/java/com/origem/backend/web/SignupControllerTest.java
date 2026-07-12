@@ -10,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Map;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -55,14 +56,39 @@ class SignupControllerTest {
                 .andReturn().getResponse().getContentAsString();
 
         String id = objectMapper.readTree(response).get("id").asText();
+        String token = objectMapper.readTree(response).get("accessToken").asText();
 
-        mockMvc.perform(get("/api/signups/" + id))
+        mockMvc.perform(get("/api/signups/" + id).header("X-Access-Token", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", is("PENDING")));
 
-        mockMvc.perform(post("/api/signups/" + id + "/pay"))
+        mockMvc.perform(post("/api/signups/" + id + "/pay").header("X-Access-Token", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", is("PAID")));
+    }
+
+    @Test
+    void rejectsAccessWithWrongToken() throws Exception {
+        Map<String, String> request = Map.of(
+                "profileType", "SUPPLIER",
+                "name", "Fazenda Boa Vista Ltda.",
+                "email", "outro@boavista.com",
+                "lang", "pt"
+        );
+
+        String response = mockMvc.perform(post("/api/signups")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        String id = objectMapper.readTree(response).get("id").asText();
+
+        mockMvc.perform(get("/api/signups/" + id).header("X-Access-Token", UUID.randomUUID().toString()))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/api/signups/" + id))
+                .andExpect(status().isNotFound());
     }
 
     @Test

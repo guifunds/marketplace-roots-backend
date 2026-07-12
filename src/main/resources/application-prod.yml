@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+
+  mail:
+    host: ${SMTP_HOST}
+    port: ${SMTP_PORT}
+    username: ${SMTP_USERNAME}
+    password: ${SMTP_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: ${SMTP_AUTH:true}
+          starttls:
+            enable: ${SMTP_STARTTLS:true}
+
+server:
+  shutdown: graceful
+
+app:
+  cors-allowed-origin: ${CORS_ALLOWED_ORIGIN}
+  payments:
+    # Em produção o pagamento simulado fica desligado por padrão — só liga com DEMO_MODE=true explícito.
+    demo-mode: ${DEMO_MODE:false}
+
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET}

@@ -4,8 +4,8 @@ spring:
 
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/origem}
-    username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD:123456}
+    username: ${DB_USER:origem}
+    password: ${DB_PASSWORD:origem}
 
   jpa:
     hibernate:

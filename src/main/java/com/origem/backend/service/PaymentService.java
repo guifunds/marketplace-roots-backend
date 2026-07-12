@@ -47,10 +47,10 @@ public class PaymentService {
      * Modo demo: reproduz o botão "Simular pagamento" do protótipo, sem Stripe.
      */
     @Transactional
-    public Signup simulatePayment(UUID signupId) {
+    public Signup simulatePayment(UUID signupId, UUID accessToken) {
         requireDemoMode(true, "Modo demo desativado — use /payment-intent com Stripe Elements.");
 
-        Signup signup = signupRepository.findById(signupId)
+        Signup signup = signupRepository.findByIdAndAccessToken(signupId, accessToken)
                 .orElseThrow(() -> new SignupNotFoundException(signupId));
 
         signup.setStatus(SignupStatus.PAID);
@@ -65,10 +65,10 @@ public class PaymentService {
      * Modo real: cria um PaymentIntent no Stripe para o front confirmar via Stripe Elements.
      */
     @Transactional
-    public PaymentIntentResponse createPaymentIntent(UUID signupId) throws StripeException {
+    public PaymentIntentResponse createPaymentIntent(UUID signupId, UUID accessToken) throws StripeException {
         requireDemoMode(false, "Modo demo ativo — use /pay para simular o pagamento.");
 
-        Signup signup = signupRepository.findById(signupId)
+        Signup signup = signupRepository.findByIdAndAccessToken(signupId, accessToken)
                 .orElseThrow(() -> new SignupNotFoundException(signupId));
 
         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()

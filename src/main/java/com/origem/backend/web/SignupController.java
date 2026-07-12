@@ -4,6 +4,7 @@ import com.origem.backend.domain.Signup;
 import com.origem.backend.dto.PaymentIntentResponse;
 import com.origem.backend.dto.SignupRequest;
 import com.origem.backend.dto.SignupResponse;
+import com.origem.backend.exception.SignupNotFoundException;
 import com.origem.backend.service.PaymentService;
 import com.origem.backend.service.SignupService;
 import com.stripe.exception.StripeException;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,17 +40,26 @@ public class SignupController {
     }
 
     @GetMapping("/{id}")
-    public SignupResponse getById(@PathVariable UUID id) {
-        return SignupResponse.from(signupService.getById(id));
+    public SignupResponse getById(@PathVariable UUID id, @RequestHeader("X-Access-Token") String accessToken) {
+        return SignupResponse.from(signupService.getById(id, parseToken(id, accessToken)));
     }
 
     @PostMapping("/{id}/pay")
-    public SignupResponse simulatePayment(@PathVariable UUID id) {
-        return SignupResponse.from(paymentService.simulatePayment(id));
+    public SignupResponse simulatePayment(@PathVariable UUID id, @RequestHeader("X-Access-Token") String accessToken) {
+        return SignupResponse.from(paymentService.simulatePayment(id, parseToken(id, accessToken)));
     }
 
     @PostMapping("/{id}/payment-intent")
-    public PaymentIntentResponse createPaymentIntent(@PathVariable UUID id) throws StripeException {
-        return paymentService.createPaymentIntent(id);
+    public PaymentIntentResponse createPaymentIntent(@PathVariable UUID id,
+                                                        @RequestHeader("X-Access-Token") String accessToken) throws StripeException {
+        return paymentService.createPaymentIntent(id, parseToken(id, accessToken));
+    }
+
+    private static UUID parseToken(UUID signupId, String accessToken) {
+        try {
+            return UUID.fromString(accessToken);
+        } catch (IllegalArgumentException e) {
+            throw new SignupNotFoundException(signupId);
+        }
     }
 }

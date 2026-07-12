@@ -20,7 +20,8 @@ public record SignupResponse(
         long foundingFeeAmountCents,
         String currency,
         Instant createdAt,
-        Instant paidAt
+        Instant paidAt,
+        UUID accessToken
 ) {
     public static SignupResponse from(Signup signup) {
         return new SignupResponse(
@@ -36,7 +37,8 @@ public record SignupResponse(
                 signup.getFoundingFeeAmountCents(),
                 signup.getCurrency(),
                 signup.getCreatedAt(),
-                signup.getPaidAt()
+                signup.getPaidAt(),
+                signup.getAccessToken()
         );
     }
 }
