@@ -1,0 +1,77 @@
+{
+  "groups": [
+    {
+      "name": "app",
+      "type": "com.origem.backend.config.AppProperties",
+      "sourceType": "com.origem.backend.config.AppProperties"
+    },
+    {
+      "name": "app.founding-fee",
+      "type": "com.origem.backend.config.AppProperties$FoundingFee",
+      "sourceType": "com.origem.backend.config.AppProperties",
+      "sourceMethod": "foundingFee()"
+    },
+    {
+      "name": "app.payments",
+      "type": "com.origem.backend.config.AppProperties$Payments",
+      "sourceType": "com.origem.backend.config.AppProperties",
+      "sourceMethod": "payments()"
+    },
+    {
+      "name": "app.rate-limit",
+      "type": "com.origem.backend.config.AppProperties$RateLimit",
+      "sourceType": "com.origem.backend.config.AppProperties",
+      "sourceMethod": "rateLimit()"
+    },
+    {
+      "name": "stripe",
+      "type": "com.origem.backend.config.StripeProperties",
+      "sourceType": "com.origem.backend.config.StripeProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "app.cors-allowed-origin",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "com.origem.backend.config.AppProperties"
+    },
+    {
+      "name": "app.founding-fee.amount-cents-brl",
+      "type": "java.lang.Long",
+      "sourceType": "com.origem.backend.config.AppProperties$FoundingFee",
+      "defaultValue": 0
+    },
+    {
+      "name": "app.founding-fee.amount-cents-usd",
+      "type": "java.lang.Long",
+      "sourceType": "com.origem.backend.config.AppProperties$FoundingFee",
+      "defaultValue": 0
+    },
+    {
+      "name": "app.payments.demo-mode",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.origem.backend.config.AppProperties$Payments",
+      "defaultValue": false
+    },
+    {
+      "name": "app.rate-limit.signups-per-minute",
+      "type": "java.lang.Integer",
+      "sourceType": "com.origem.backend.config.AppProperties$RateLimit",
+      "defaultValue": 0
+    },
+    {
+      "name": "stripe.secret-key",
+      "type": "java.lang.String",
+      "sourceType": "com.origem.backend.config.StripeProperties"
+    },
+    {
+      "name": "stripe.webhook-secret",
+      "type": "java.lang.String",
+      "sourceType": "com.origem.backend.config.StripeProperties"
+    }
+  ],
+  "hints": [],
+  "ignored": {
+    "properties": []
+  }
+}

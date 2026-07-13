@@ -1,11 +1,8 @@
 spring:
-  application:
-    name: backend
-
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/origem}
-    username: ${DB_USER:origem}
-    password: ${DB_PASSWORD:origem}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:123456}
 
   jpa:
     hibernate:
@@ -31,15 +28,30 @@ spring:
 server:
   port: ${SERVER_PORT:8080}
 
-
+management:
+  server:
+    # Porta separada da API pública — em produção, mantenha essa porta acessível só na rede interna
+    # (orquestrador/monitoramento), nunca exposta publicamente junto com a porta 8080.
+    port: ${MANAGEMENT_PORT:8081}
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  endpoint:
+    health:
+      show-details: never
+  #mudar cors localhost para url da aplicação
 app:
   cors-allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:3000}
   payments:
     demo-mode: ${DEMO_MODE:true}
   founding-fee:
     # Taxa de fundador — valor default do protótipo (R$ 1.490 / $1.490 USD), ainda não definido pelo cliente.
-    amount-cents-brl: ${FOUNDING_FEE_CENTS_BRL:149000}
-    amount-cents-usd: ${FOUNDING_FEE_CENTS_USD:149000}
+    amount-cents-brl: ${FOUNDING_FEE_CENTS_BRL:1200}
+    amount-cents-usd: ${FOUNDING_FEE_CENTS_USD:2349}
+  rate-limit:
+    # Limite de criação de cadastros (POST /api/signups) por IP, por minuto.
+    signups-per-minute: ${SIGNUPS_RATE_LIMIT_PER_MINUTE:10}
 
 stripe:
   secret-key: ${STRIPE_SECRET_KEY:}

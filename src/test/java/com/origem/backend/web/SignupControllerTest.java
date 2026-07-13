@@ -35,7 +35,7 @@ class SignupControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.fieldErrors.length()", is(3)));
+                .andExpect(jsonPath("$.fieldErrors.length()", is(6)));
     }
 
     @Test
@@ -44,6 +44,9 @@ class SignupControllerTest {
                 "profileType", "SUPPLIER",
                 "name", "Fazenda Boa Vista Ltda.",
                 "email", "contato@boavista.com",
+                "phone", "+1 555 010-0001",
+                "document", "TAX-BOAVISTA-1",
+                "country", "Estados Unidos",
                 "lang", "pt"
         );
 
@@ -73,6 +76,9 @@ class SignupControllerTest {
                 "profileType", "SUPPLIER",
                 "name", "Fazenda Boa Vista Ltda.",
                 "email", "outro@boavista.com",
+                "phone", "+1 555 010-0002",
+                "document", "TAX-OUTRO-1",
+                "country", "Estados Unidos",
                 "lang", "pt"
         );
 
@@ -98,6 +104,8 @@ class SignupControllerTest {
                 "name", "Fazenda Boa Vista Ltda.",
                 "email", "contato@boavista.com",
                 "phone", "abc",
+                "document", "TAX-PHONE-TEST",
+                "country", "Estados Unidos",
                 "lang", "pt"
         );
 
@@ -114,6 +122,7 @@ class SignupControllerTest {
                 "profileType", "SUPPLIER",
                 "name", "Fazenda Boa Vista Ltda.",
                 "email", "contato@boavista.com",
+                "phone", "+55 11 90000-0001",
                 "document", "11.111.111/1111-11",
                 "country", "Brasil",
                 "lang", "pt"
@@ -132,6 +141,7 @@ class SignupControllerTest {
                 "profileType", "SUPPLIER",
                 "name", "Fazenda Boa Vista Ltda.",
                 "email", "contato2@boavista.com",
+                "phone", "+55 11 90000-0002",
                 "document", "11.222.333/0001-81",
                 "country", "Brasil",
                 "lang", "pt"
@@ -149,6 +159,7 @@ class SignupControllerTest {
                 "profileType", "BUYER",
                 "name", "Global Foods Inc.",
                 "email", "buyer@globalfoods.com",
+                "phone", "+1 555 010-0003",
                 "document", "EIN-98-7654321",
                 "country", "United States",
                 "lang", "en"
@@ -158,5 +169,105 @@ class SignupControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    void rejectsDuplicateEmailForSameProfileType() throws Exception {
+        Map<String, String> request = Map.of(
+                "profileType", "SUPPLIER",
+                "name", "Fazenda Duplicada Ltda.",
+                "email", "duplicado@boavista.com",
+                "phone", "+1 555 010-0004",
+                "document", "TAX-DUP-1",
+                "country", "Estados Unidos",
+                "lang", "pt"
+        );
+
+        mockMvc.perform(post("/api/signups")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated());
+
+        Map<String, String> sameEmailUppercase = Map.of(
+                "profileType", "SUPPLIER",
+                "name", "Outra Fazenda Ltda.",
+                "email", "DUPLICADO@boavista.com",
+                "phone", "+1 555 010-0005",
+                "document", "TAX-DUP-2",
+                "country", "Estados Unidos",
+                "lang", "pt"
+        );
+
+        mockMvc.perform(post("/api/signups")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(sameEmailUppercase)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fieldErrors[0].field", is("email")))
+                .andExpect(jsonPath("$.message", is("Já existe um cadastro com esse e-mail para esse tipo de perfil")));
+    }
+
+    @Test
+    void allowsSameEmailForDifferentProfileType() throws Exception {
+        Map<String, String> asSupplier = Map.of(
+                "profileType", "SUPPLIER",
+                "name", "Fazenda Dupla Ltda.",
+                "email", "dupla@boavista.com",
+                "phone", "+1 555 010-0006",
+                "document", "TAX-DUPLA-S",
+                "country", "Estados Unidos",
+                "lang", "pt"
+        );
+        Map<String, String> asBuyer = Map.of(
+                "profileType", "BUYER",
+                "name", "Fazenda Dupla Ltda.",
+                "email", "dupla@boavista.com",
+                "phone", "+1 555 010-0007",
+                "document", "TAX-DUPLA-B",
+                "country", "Estados Unidos",
+                "lang", "pt"
+        );
+
+        mockMvc.perform(post("/api/signups")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(asSupplier)))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/api/signups")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(asBuyer)))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void rejectsDuplicateCnpjForSameProfileType() throws Exception {
+        Map<String, String> request = Map.of(
+                "profileType", "SUPPLIER",
+                "name", "Fazenda CNPJ Duplicado Ltda.",
+                "email", "cnpj-duplicado-1@boavista.com",
+                "phone", "+55 11 90000-0003",
+                "document", "11.444.777/0001-61",
+                "country", "Brasil",
+                "lang", "pt"
+        );
+        Map<String, String> sameCnpjDifferentEmail = Map.of(
+                "profileType", "SUPPLIER",
+                "name", "Fazenda CNPJ Duplicado Filial Ltda.",
+                "email", "cnpj-duplicado-2@boavista.com",
+                "phone", "+55 11 90000-0004",
+                "document", "11.444.777/0001-61",
+                "country", "Brasil",
+                "lang", "pt"
+        );
+
+        mockMvc.perform(post("/api/signups")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/api/signups")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(sameCnpjDifferentEmail)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fieldErrors[0].field", is("document")));
     }
 }

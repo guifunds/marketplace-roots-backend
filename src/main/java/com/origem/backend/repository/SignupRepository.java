@@ -1,5 +1,6 @@
 package com.origem.backend.repository;
 
+import com.origem.backend.domain.ProfileType;
 import com.origem.backend.domain.Signup;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -10,4 +11,8 @@ public interface SignupRepository extends JpaRepository<Signup, UUID> {
     Optional<Signup> findByStripePaymentIntentId(String stripePaymentIntentId);
 
     Optional<Signup> findByIdAndAccessToken(UUID id, UUID accessToken);
+
+    boolean existsByEmailAndProfileType(String email, ProfileType profileType);
+
+    boolean existsByDocumentAndProfileType(String document, ProfileType profileType);
 }
