@@ -1,6 +1,7 @@
 package com.origem.backend.service;
 
 import com.origem.backend.domain.Signup;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,9 +16,11 @@ public class EmailService {
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
 
     private final JavaMailSender mailSender;
+    private final MeterRegistry meterRegistry;
 
-    public EmailService(JavaMailSender mailSender) {
+    public EmailService(JavaMailSender mailSender, MeterRegistry meterRegistry) {
         this.mailSender = mailSender;
+        this.meterRegistry = meterRegistry;
     }
 
     public void sendPaymentConfirmation(Signup signup) {
@@ -38,6 +41,7 @@ public class EmailService {
             mailSender.send(message);
         } catch (Exception e) {
             log.warn("Falha ao enviar e-mail de confirmação para {}: {}", signup.getEmail(), e.getMessage());
+            meterRegistry.counter("email.confirmation.failures").increment();
         }
     }
 }

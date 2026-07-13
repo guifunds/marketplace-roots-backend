@@ -31,18 +31,26 @@ public class SignupService {
     public Signup create(SignupRequest request) {
         String lang = request.lang() != null ? request.lang() : "pt";
         boolean isPt = "pt".equals(lang);
+        String email = request.email().trim().toLowerCase();
+        String document = request.document().trim();
 
-        String document = request.document() != null ? request.document().trim() : null;
-        if (document != null && !document.isEmpty() && isBrazil(request.country()) && !isValidCnpj(document)) {
+        if (isBrazil(request.country()) && !isValidCnpj(document)) {
             throw new InvalidFieldException("document", "CNPJ inválido");
+        }
+
+        if (signupRepository.existsByEmailAndProfileType(email, request.profileType())) {
+            throw new InvalidFieldException("email", "Já existe um cadastro com esse e-mail para esse tipo de perfil");
+        }
+        if (signupRepository.existsByDocumentAndProfileType(document, request.profileType())) {
+            throw new InvalidFieldException("document", "Já existe um cadastro com esse documento para esse tipo de perfil");
         }
 
         Signup signup = Signup.builder()
                 .profileType(request.profileType())
                 .name(request.name())
-                .email(request.email())
+                .email(email)
                 .phone(request.phone())
-                .document(request.document())
+                .document(document)
                 .country(request.country())
                 .lang(lang)
                 .status(SignupStatus.PENDING)

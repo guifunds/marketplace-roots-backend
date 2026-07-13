@@ -7,12 +7,18 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import java.time.Instant;
 import java.util.UUID;
 
+// O documento (CNPJ) também é único por tipo de perfil em produção, mas isso é um índice
+// PARCIAL no Postgres (só quando document não é nulo/vazio — ver migração V3), algo que a
+// anotação @UniqueConstraint do JPA não sabe expressar. Um @UniqueConstraint comum ali
+// bloquearia incorretamente vários cadastros legítimos com documento em branco. Por isso essa
+// checagem fica só em SignupService (existsByDocumentAndProfileType) + no índice do Postgres.
 @Entity
-@Table(name = "signups")
+@Table(name = "signups", uniqueConstraints = @UniqueConstraint(columnNames = {"email", "profile_type"}))
 public class Signup {
 
     @Id

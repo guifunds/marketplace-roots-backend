@@ -5,6 +5,7 @@ import com.origem.backend.exception.InvalidFieldException;
 import com.origem.backend.exception.InvalidPaymentModeException;
 import com.origem.backend.exception.SignupNotFoundException;
 import com.stripe.exception.StripeException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -28,7 +29,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidFieldException.class)
     public ResponseEntity<ApiError> handleInvalidField(InvalidFieldException ex) {
         List<ApiError.FieldError> fieldErrors = List.of(new ApiError.FieldError(ex.getField(), ex.getMessage()));
-        return ResponseEntity.badRequest().body(ApiError.of("Campos inválidos", fieldErrors));
+        return ResponseEntity.badRequest().body(ApiError.of(ex.getMessage(), fieldErrors));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        // Rede de segurança contra corrida entre duas requisições simultâneas com o mesmo
+        // e-mail/documento — a verificação em SignupService já cobre o caso comum, isto aqui
+        // só evita vazar um erro 500 cru caso as duas cheguem ao banco ao mesmo tempo.
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiError.of("Já existe um cadastro com esses dados para esse tipo de perfil."));
     }
 
     @ExceptionHandler(MissingRequestHeaderException.class)
