@@ -1,61 +1,193 @@
+<div align="center">
+
 # Roots — Backend
 
-API REST em Spring Boot, marketplace B2B que conecta produtores/exportadores brasileiros a compradores internacionais. Este serviço cobre o fluxo de acesso antecipado: cadastro, confirmação, pagamento (simulado ou Stripe real) e e-mail de confirmação.
+**REST API for the Roots B2B Marketplace**
 
+Connecting Brazilian producers and exporters with international buyers.
 
-## Stack
+![Java](https://img.shields.io/badge/Java-21-orange?style=flat-square&logo=openjdk)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?style=flat-square&logo=springboot)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql)
+![Flyway](https://img.shields.io/badge/Flyway-Migrations-CC0200?style=flat-square&logo=flyway)
+![Stripe](https://img.shields.io/badge/Stripe-Payments-635BFF?style=flat-square&logo=stripe)
 
-- Java 21, Spring Boot 3.5
-- PostgreSQL + Flyway (migrações versionadas)
-- Stripe (PaymentIntents + webhook) ou modo de pagamento simulado
-- Spring Boot Actuator (health check + métricas, porta separada)
-- Maven (via wrapper `./mvnw`, não precisa instalar Maven)
+</div>
 
-## Pré-requisitos
+---
+
+## Overview
+
+This backend powers the **Roots Marketplace**, a B2B platform that connects Brazilian suppliers with international buyers.
+
+The API handles the complete early-access onboarding flow:
+
+- Company registration
+- Email confirmation
+- Payment processing (Stripe or Demo Mode)
+- Signup confirmation
+- Health monitoring with Spring Boot Actuator
+
+---
+
+## Tech Stack
+
+| Technology | Description |
+|------------|-------------|
+| Java 21 | Programming language |
+| Spring Boot 3.5 | REST API framework |
+| PostgreSQL | Relational database |
+| Flyway | Database versioning |
+| Stripe | Payment processing |
+| Spring Boot Actuator | Health checks & metrics |
+| Maven Wrapper | Build tool |
+
+---
+
+## Prerequisites
+
+Before running the application, ensure you have:
 
 - JDK 21
-- PostgreSQL 16 acessível (via Docker ou instalado localmente — veja o [README raiz](../README.md#1-suba-a-infraestrutura-postgres--e-mail))
+- PostgreSQL 16
+- Docker (recommended)
 
-## Como rodar
+Infrastructure setup:
 
-Com a infraestrutura (Postgres, opcionalmente Mailhog) já no ar:
+> See the [root README](../README.md#1-start-the-infrastructure-postgresql--email)
+
+---
+
+## Running the Application
+
+Start the application:
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-- API pública em `http://localhost:8080`
-- Health check e métricas (Actuator) em `http://localhost:8081/actuator/health`
-- Migrações Flyway rodam automaticamente na primeira execução
+### Services
 
-Rodar os testes:
+| Service | URL |
+|---------|-----|
+| REST API | http://localhost:8080 |
+| Health Check | http://localhost:8081/actuator/health |
+| Actuator | http://localhost:8081/actuator |
+
+Flyway migrations run automatically during startup.
+
+---
+
+## Running Tests
 
 ```bash
 ./mvnw test
 ```
 
-## Estrutura
+---
 
-```
+## Project Structure
+
+```text
 src/main/java/com/origem/backend/
-├── domain/       Entidades JPA (Signup, ProfileType, SignupStatus)
-├── dto/          Records de requisição/resposta
-├── repository/   Spring Data JPA
-├── service/      Regras de negócio (SignupService, PaymentService, EmailService)
-├── web/          Controllers REST, tratamento global de erros, rate limit
-├── config/       CORS, propriedades da aplicação, configuração do Stripe
-└── exception/    Exceções de domínio
-src/main/resources/
-├── application.yml         Configuração padrão (desenvolvimento)
-├── application-prod.yml    Configuração de produção (profile "prod")
-└── db/migration/           Migrações Flyway
+
+├── config/
+│   ├── CORS
+│   ├── Stripe
+│   └── Application Configuration
+│
+├── domain/
+│   ├── Signup
+│   ├── ProfileType
+│   └── SignupStatus
+│
+├── dto/
+│   ├── Requests
+│   └── Responses
+│
+├── exception/
+│
+├── repository/
+│
+├── service/
+│   ├── SignupService
+│   ├── PaymentService
+│   └── EmailService
+│
+└── web/
+    ├── Controllers
+    ├── Exception Handler
+    └── Rate Limiting
 ```
 
-## Configuração
+Resources
 
-Toda a configuração é feita por variáveis de ambiente — nenhuma precisa ser editada no código, e os defaults de desenvolvimento já funcionam com o `docker-compose.yml` da raiz do projeto.
+```text
+src/main/resources/
 
+├── application.yml
+├── application-prod.yml
+└── db/
+    └── migration/
+```
 
-## Modo demo vs. Stripe real
+---
 
-Por padrão (`DEMO_MODE=true`), `POST /api/signups/{id}/pay` marca o cadastro como pago sem chamar o Stripe — nenhuma chave é necessária. Para ligar o Stripe de verdade, veja [../docs/02-configuracao.md](../docs/02-configuracao.md#pagamento--modo-demo-vs-stripe-real).
+## Configuration
+
+All configuration is managed through environment variables.
+
+The default development configuration works out of the box with the project's root `docker-compose.yml`.
+
+---
+
+## Payment Modes
+
+### Demo Mode
+
+When `DEMO_MODE=true` (default), the endpoint
+
+```http
+POST /api/signups/{id}/pay
+```
+
+marks the signup as paid without contacting Stripe.
+
+This mode is intended for:
+
+- Local development
+- Automated testing
+- CI/CD pipelines
+
+### Stripe Mode
+
+To use Stripe:
+
+```properties
+DEMO_MODE=false
+```
+
+Configure your Stripe API keys and webhook.
+
+For detailed instructions, see the [Configuration Guide](../docs/02-configuration.md#payments--demo-mode-vs-real-stripe).
+
+---
+
+## Features
+
+- RESTful API
+- Stripe Integration
+- Demo Payment Mode
+- Email Confirmation
+- Flyway Migrations
+- PostgreSQL
+- Spring Boot Actuator
+- Global Exception Handling
+- Rate Limiting
+- Environment-based Configuration
+
+---
+
+## License
+
+This project is licensed under the MIT License.
